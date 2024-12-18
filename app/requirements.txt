@@ -1,0 +1,17 @@
+Flask==2.3.2
+pydantic==2.6.3
+authlib==1.2.0
+openai==1.51.0
+gunicorn==20.1.0
+python-dotenv==1.0.0
+spacy==3.8.0
+# Ensure compatibility between spaCy and thinc
+thinc==8.2.2
+# Pin numpy to a compatible version
+numpy==1.23.5
+# Ensure httpx is compatible with openai
+httpx==0.23.3
+# Install spaCy model directly via pip
+en_core_web_lg @ https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.8.0/en_core_web_lg-3.8.0.tar.gz
+together==1.2.7
+anthropic==0.40.0

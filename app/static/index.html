@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>OpenAI Prompt Page</title>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+  }
+  .login-container, .input-container, .output-container {
+    margin-bottom: 20px;
+  }
+  textarea {
+    width: 100%;
+    height: 200px;
+    font-size: 16px;
+    padding: 10px;
+    box-sizing: border-box;
+    resize: none;
+  }
+  button {
+    margin-top: 10px;
+    padding: 10px 20px;
+    font-size: 16px;
+  }
+  .output-container {
+    margin-top: 40px;
+    border-top: 1px solid #ccc;
+    padding-top: 20px;
+    min-height: 100px;
+  }
+</style>
+</head>
+<body>
+<div class="login-container" id="loginContainer">
+  <h2>Sign In with Google</h2>
+  <a href="/login"><button id="loginButton">Login with Google</button></a>
+  <p id="loginStatus"></p>
+</div>
+
+<div class="input-container" id="inputContainer" style="display: none;">
+  <h2>Enter Your Story for Analysis</h2>
+  <textarea id="promptInput" placeholder="Paste your story here..."></textarea><br/>
+  <button id="sendButton">Send</button>
+  <button id="stopButton" style="display: none;">Stop Analysis</button>
+</div>
+
+<div class="output-container" id="outputContainer" style="display: none;">
+  <h2>Output</h2>
+</div>
+
+<script>
+const colorMap = {
+  "Headline": "#1f77b4",
+  "Introduction": "#ff7f0e",
+  "Lede": "#2ca02c",
+  "Nut graf": "#d62728",
+  "Background information": "#9467bd",
+  "Opinion": "#8c564b",
+  "Color": "#e377c2",
+  "Transition": "#7f7f7f",
+  "Supporting detail": "#bcbd22",
+  "Sourcing/source information": "#17becf"
+};
+
+async function checkLoginStatus() {
+  // Attempt a simple call to /api/ask with no prompt just to check if logged in
+  // Alternatively, create a separate endpoint to verify login if desired
+  const response = await fetch("/api/ask", {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({})});
+  if (response.status === 401) {
+    // not logged in
+    $("#loginContainer").show();
+    $("#inputContainer").hide();
+    $("#outputContainer").hide();
+  } else {
+    // logged in
+    $("#loginContainer").hide();
+    $("#inputContainer").show();
+    $("#outputContainer").show();
+  }
+}
+
+$("#sendButton").on("click", async function() {
+  const userPrompt = $("#promptInput").val().trim();
+  if (!userPrompt) {
+    alert("Please enter a prompt.");
+    return;
+  }
+
+  // Show stop button, hide send button
+  $("#stopButton").show();
+  $("#sendButton").hide();
+
+  // Clear previous output
+  $("#outputContainer").empty();
+  const container = $("<div>").addClass("container");
+  $("#outputContainer").append(container);
+
+
+  
+  try {
+    // First, initiate the analysis with a POST request
+    const response = await fetch('/api/ask', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ story: userPrompt })
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    // Use the response directly as the event stream
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let sentences = [];
+
+    while (true) {
+      const {value, done} = await reader.read();
+      if (done) break;
+      
+      const chunk = decoder.decode(value);
+      const lines = chunk.split('\n');
+      let sentences_are_written = false;
+
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          const data = JSON.parse(line.slice(6));
+          
+          switch(data.type) {
+            case 'clean_text':
+              $("#promptInput").val(data.text);
+              break;
+
+            case 'sentences':
+              sentences = data.sentences;
+              sentences.forEach((sentence, index) => {
+                const row = $("<div>").addClass("row mb-3").attr('id', `sentence-${index}`);
+                const labelCol = $("<div>").addClass("col-md-3").text("Analyzing...");
+                const sentenceCol = $("<div>").addClass("col-md-9").text(sentence);
+                row.append(labelCol, sentenceCol);
+                container.append(row);
+              });
+              sentences_are_written = true;
+              break;
+
+            case 'analysis':
+              updateSentenceLabel(data.index, data.analysis, colorMap[data.analysis] || "#ffffff");
+              break;
+
+            case 'error':
+              if (!sentences_are_written) {
+                displayOutput("Error: " + data.message);
+                return;
+              }  else {
+                updateSentenceLabel(data.index, "Error: " + data.message, "#ff0000");
+              }
+              break;
+
+            case 'complete':
+              $("#sendButton").show();
+              return;
+
+            case 'stopped':
+              if (!sentences_are_written) {
+                displayOutput("Analysis stopped by user.");
+              } else {
+                updateSentenceLabel(data.index, "Stopped", "#ff0000");
+              }
+              return;
+          }
+        }
+      }
+    }
+
+  } catch (error) {
+    console.error("Request error:", error);
+    displayOutput("Error: " + error.message);
+  } finally {
+    // Hide stop button, show send button
+    $("#stopButton").hide();
+    $("#sendButton").show();
+  }
+});
+
+$("#stopButton").on("click", async function() {
+  try {
+    const response = await fetch('/api/stop', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    // Update UI to show analysis was stopped
+    displayOutput("Analysis stopped by user.");
+    
+    // Reset buttons
+    $("#stopButton").hide();
+    $("#sendButton").show();
+    
+  } catch (error) {
+    console.error("Stop request error:", error);
+    displayOutput("Error stopping analysis: " + error.message);
+  }
+});
+
+function displayOutput(text) {
+  const p = $("<p>").text(text);
+  $("#outputContainer").append(p);
+}
+
+function updateSentenceLabel(index, text, backgroundColor = null) {
+  // Updates the label and background color for a sentence at the given index
+  // @param {number} index - The index of the sentence to update
+  // @param {string} text - The new label text to display
+  // @param {string} [backgroundColor] - Optional background color for the label
+  const row = $(`#sentence-${index}`);
+  const labelCol = row.find('.col-md-3');
+  labelCol.text(text);
+  if (backgroundColor) {
+    labelCol.css("background-color", backgroundColor);
+  }
+}
+
+checkLoginStatus();
+</script>
+
+</body>
+</html>
