@@ -1,61 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>OpenAI Prompt Page</title>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    margin: 20px;
-  }
-  .login-container, .input-container, .output-container {
-    margin-bottom: 20px;
-  }
-  textarea {
-    width: 100%;
-    height: 200px;
-    font-size: 16px;
-    padding: 10px;
-    box-sizing: border-box;
-    resize: none;
-  }
-  button {
-    margin-top: 10px;
-    padding: 10px 20px;
-    font-size: 16px;
-  }
-  .output-container {
-    margin-top: 40px;
-    border-top: 1px solid #ccc;
-    padding-top: 20px;
-    min-height: 100px;
-  }
-</style>
-</head>
-<body>
-<div class="login-container" id="loginContainer">
-  <h2>Sign In with Google</h2>
-  <a href="/login"><button id="loginButton">Login with Google</button></a>
-  <p id="loginStatus"></p>
-</div>
-
-<div class="input-container" id="inputContainer" style="display: none;">
-  <h2>Enter Your Story for Analysis</h2>
-  <textarea id="promptInput" placeholder="Paste your story here..."></textarea><br/>
-  <button id="sendButton">Send</button>
-  <button id="stopButton" style="display: none;">Stop Analysis</button>
-</div>
-
-<div class="output-container" id="outputContainer" style="display: none;">
-  <h2>Output</h2>
-</div>
-
-<script>
 const colorMap = {
   "Headline": "#1f77b4",
   "Introduction": "#ff7f0e",
@@ -70,16 +12,16 @@ const colorMap = {
 };
 
 async function checkLoginStatus() {
-  // Attempt a simple call to /api/ask with no prompt just to check if logged in
-  // Alternatively, create a separate endpoint to verify login if desired
-  const response = await fetch("/api/ask", {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({})});
+  const response = await fetch("/api/ask", {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({})
+  });
   if (response.status === 401) {
-    // not logged in
     $("#loginContainer").show();
     $("#inputContainer").hide();
     $("#outputContainer").hide();
   } else {
-    // logged in
     $("#loginContainer").hide();
     $("#inputContainer").show();
     $("#outputContainer").show();
@@ -92,20 +34,13 @@ $("#sendButton").on("click", async function() {
     alert("Please enter a prompt.");
     return;
   }
-
-  // Show stop button, hide send button
   $("#stopButton").show();
   $("#sendButton").hide();
-
-  // Clear previous output
   $("#outputContainer").empty();
   const container = $("<div>").addClass("container");
   $("#outputContainer").append(container);
-
-
   
   try {
-    // First, initiate the analysis with a POST request
     const response = await fetch('/api/ask', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -116,7 +51,6 @@ $("#sendButton").on("click", async function() {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    // Use the response directly as the event stream
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
     let sentences = [];
@@ -127,7 +61,7 @@ $("#sendButton").on("click", async function() {
       
       const chunk = decoder.decode(value);
       const lines = chunk.split('\n');
-      let sentences_are_written = false;
+      let sentences_written = false;
 
       for (const line of lines) {
         if (line.startsWith('data: ')) {
@@ -137,7 +71,6 @@ $("#sendButton").on("click", async function() {
             case 'clean_text':
               $("#promptInput").val(data.text);
               break;
-
             case 'sentences':
               sentences = data.sentences;
               sentences.forEach((sentence, index) => {
@@ -147,28 +80,24 @@ $("#sendButton").on("click", async function() {
                 row.append(labelCol, sentenceCol);
                 container.append(row);
               });
-              sentences_are_written = true;
+              sentences_written = true;
               break;
-
             case 'analysis':
               updateSentenceLabel(data.index, data.analysis, colorMap[data.analysis] || "#ffffff");
               break;
-
             case 'error':
-              if (!sentences_are_written) {
+              if (!sentences_written) {
                 displayOutput("Error: " + data.message);
                 return;
-              }  else {
+              } else {
                 updateSentenceLabel(data.index, "Error: " + data.message, "#ff0000");
               }
               break;
-
             case 'complete':
               $("#sendButton").show();
               return;
-
             case 'stopped':
-              if (!sentences_are_written) {
+              if (!sentences_written) {
                 displayOutput("Analysis stopped by user.");
               } else {
                 updateSentenceLabel(data.index, "Stopped", "#ff0000");
@@ -183,7 +112,6 @@ $("#sendButton").on("click", async function() {
     console.error("Request error:", error);
     displayOutput("Error: " + error.message);
   } finally {
-    // Hide stop button, show send button
     $("#stopButton").hide();
     $("#sendButton").show();
   }
@@ -199,14 +127,9 @@ $("#stopButton").on("click", async function() {
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    
-    // Update UI to show analysis was stopped
     displayOutput("Analysis stopped by user.");
-    
-    // Reset buttons
     $("#stopButton").hide();
     $("#sendButton").show();
-    
   } catch (error) {
     console.error("Stop request error:", error);
     displayOutput("Error stopping analysis: " + error.message);
@@ -219,10 +142,6 @@ function displayOutput(text) {
 }
 
 function updateSentenceLabel(index, text, backgroundColor = null) {
-  // Updates the label and background color for a sentence at the given index
-  // @param {number} index - The index of the sentence to update
-  // @param {string} text - The new label text to display
-  // @param {string} [backgroundColor] - Optional background color for the label
   const row = $(`#sentence-${index}`);
   const labelCol = row.find('.col-md-3');
   labelCol.text(text);
@@ -230,9 +149,3 @@ function updateSentenceLabel(index, text, backgroundColor = null) {
     labelCol.css("background-color", backgroundColor);
   }
 }
-
-checkLoginStatus();
-</script>
-
-</body>
-</html>
