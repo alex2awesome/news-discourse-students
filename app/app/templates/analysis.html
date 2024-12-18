@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="input-container" id="inputContainer">
+  <h2>Enter Your Story for Analysis</h2>
+  <textarea id="promptInput" placeholder="Paste your story here..."></textarea><br/>
+  <button id="sendButton">Send</button>
+  <button id="stopButton" style="display: none;">Stop Analysis</button>
+</div>
+
+<div class="output-container" id="outputContainer" style="display: none;">
+  <h2>Output</h2>
+</div>
+<script>
+$(document).ready(function() {
+  checkLoginStatus();
+});
+</script>
+{% endblock %}
