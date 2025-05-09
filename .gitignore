@@ -108,6 +108,9 @@ share/python-wheels/
 *.egg
 MANIFEST
 
+app/app/annenberg_index 
+app/app/latimes_index 
+
 *.safetensors
 data
 

@@ -1,8 +1,13 @@
 class Config:
-    # Flask settings
-    SECRET_KEY = 'your-secret-key'  # Replace with env variable in production
-    
-    # Application settings
+    # API Keys and Secrets
+    GOOGLE_CLIENT_ID = None
+    GOOGLE_CLIENT_SECRET = None
+    FLASK_SECRET_KEY = None
+    OPENAI_API_KEY = None
+    TOGETHER_API_KEY = None
+    ANTHROPIC_API_KEY = None
+
+    # Application Settings
     USE_SPACY = True
     CLEAN_TEXT = False
     LLM_CLIENT = "openai"

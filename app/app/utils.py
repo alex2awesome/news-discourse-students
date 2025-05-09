@@ -5,27 +5,33 @@ import asyncio
 from openai import AsyncOpenAI
 from anthropic import AsyncAnthropic
 from together import AsyncTogether
-from . import (
-    USE_SPACY, CLEAN_TEXT,
-    LLM_CLIENT, DEFAULT_CLAUDE_MODEL, DEFAULT_TOGETHER_MODEL, DEFAULT_OPENAI_MODEL,
-    load_spacy_model
-)
+from .config.default import Config
 from .prompts import SENTENCIZE_PROMPT, CLEAN_TEXT_PROMPT
 import spacy
 import os 
 from .prompts import LABELING_PROMPT
+import logging
 
+logger = logging.getLogger(__name__)
 
-BATCH_SIZE = os.environ.get('BATCH_SIZE', 2)
-CLEAN_TEXT = os.environ.get('CLEAN_TEXT', False)
+# Use Config class attributes instead of direct imports
+BATCH_SIZE = Config.BATCH_SIZE
+CLEAN_TEXT = Config.CLEAN_TEXT
+USE_SPACY = Config.USE_SPACY
+LLM_CLIENT = Config.LLM_CLIENT
+DEFAULT_CLAUDE_MODEL = Config.DEFAULT_CLAUDE_MODEL
+DEFAULT_TOGETHER_MODEL = Config.DEFAULT_TOGETHER_MODEL
+DEFAULT_OPENAI_MODEL = Config.DEFAULT_OPENAI_MODEL
 
-
-spacy_model = None
-def load_spacy_model():
-    global spacy_model
-    if spacy_model is None:
-        spacy_model = spacy.load("en_core_web_lg")
-    return spacy_model
+# Lazy loading of spaCy model
+_spacy_model = None
+def get_spacy_model():
+    global _spacy_model
+    if _spacy_model is None:
+        logger.info("Loading spaCy model...")
+        _spacy_model = spacy.load("en_core_web_lg")
+        logger.info("spaCy model loaded successfully")
+    return _spacy_model
 
 def robust_parse_answer(answer):
     parsed_sentences = re.search(r'\[.*?\]', answer)
@@ -134,6 +140,7 @@ def call_claude(prompt, model, max_retries=3, post_process=None):
 
 def call_llm(prompt, model=None, max_retries=3, post_process=None):
     """Wrapper function to choose between OpenAI, Together, and Claude APIs"""
+    logger.info(f"Calling LLM with client: {LLM_CLIENT}")
     match LLM_CLIENT:
         case "claude":
             return call_claude(prompt, model or DEFAULT_CLAUDE_MODEL, max_retries, post_process)
@@ -143,6 +150,7 @@ def call_llm(prompt, model=None, max_retries=3, post_process=None):
             return call_openai_async(prompt, model or DEFAULT_OPENAI_MODEL, max_retries, post_process)
 
 def call_llm_batch(prompts, model=None, max_retries=3, post_process=None):
+    logger.info(f"Calling LLM batch with client: {LLM_CLIENT}")
     match LLM_CLIENT:
         case "claude":
             return call_claude_batch(prompts, model or DEFAULT_CLAUDE_MODEL, max_retries, post_process)
@@ -161,13 +169,24 @@ def process_text(story):
 def get_sentences(story):
     """Common sentence parsing logic"""
     if not USE_SPACY:
+        logger.info("Using LLM for sentence parsing")
         sentencizer_prompt = SENTENCIZE_PROMPT.format(story=story)
         return call_llm(sentencizer_prompt, post_process=robust_parse_answer)
     else:
-        nlp = load_spacy_model()
+        logger.info("Using spaCy for sentence parsing")
+        nlp = get_spacy_model()
         parsed_sentences = nlp(story).sents
         return list(map(str, parsed_sentences))
 
+def call_openai_async(prompt, model, max_retries=3, post_process=None):
+    client = AsyncOpenAI()
+    async def async_chat_completion(message):
+        response = await client.chat.completions.create(
+            model=model,
+            messages=[{"role": "user", "content": message}]
+        )
+        return response.choices[0].message.content
+    return asyncio.run(async_chat_completion(prompt))
 
 def generate(story, request_id, analyzing_requests):
     analyzing_requests.add(request_id)

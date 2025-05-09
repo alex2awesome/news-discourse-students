@@ -5,6 +5,7 @@ import os
 from flask import Blueprint
 from .utils import process_text, get_sentences, call_llm, call_llm_batch, generate
 from flask import current_app
+from .prompts import LABELING_PROMPT
 
 
 main_bp = Blueprint('main', __name__)

@@ -1,8 +1,16 @@
 {% extends "layout.html" %}
 {% block content %}
 <div class="login-container" id="loginContainer">
-  <h2>Sign In with Google</h2>
-  <a href="/login"><button id="loginButton">Login with Google</button></a>
-  <p id="loginStatus"></p>
+  <div class="text-center">
+    <h2 class="mb-4">Sign In with Google</h2>
+    <div id="loadingSpinner" class="spinner-border text-primary mb-3" role="status" style="display: none;">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <a href="/login" class="btn btn-primary btn-lg">
+      <img src="{{ url_for('static', filename='img/google-logo.png') }}" alt="Google Logo" style="height: 24px; margin-right: 10px;">
+      Login with Google
+    </a>
+    <p id="loginStatus" class="mt-3 text-muted"></p>
+  </div>
 </div>
 {% endblock %}

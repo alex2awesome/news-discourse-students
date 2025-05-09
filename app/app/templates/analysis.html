@@ -2,17 +2,48 @@
 {% block content %}
 <div class="input-container" id="inputContainer">
   <h2>Enter Your Story for Analysis</h2>
+  <div class="controls">
+    <div class="control-group">
+      <label for="modelSelector">Select Model:</label>
+      <select id="modelSelector">
+        <option value="openai">GPT4o</option>
+        <option value="together">Llama-3.1-70b</option>
+        <option value="anthropic">Claude-3.5-sonnet</option>
+      </select>
+    </div>
+  </div>
   <textarea id="promptInput" placeholder="Paste your story here..."></textarea><br/>
   <button id="sendButton">Send</button>
   <button id="stopButton" style="display: none;">Stop Analysis</button>
 </div>
 
 <div class="output-container" id="outputContainer" style="display: none;">
-  <h2>Output</h2>
+  <div id="analysisResults"></div>
+  
+  <div class="similar-articles-section" style="display: none;">
+    <h2>Dive Deeper</h2>
+    <p class="analysis-explanation">We'll show you articles on similar topics written by your peers at Annenberg Media Center or from the LA Times, and you can see how they chose to structure their articles.</p>
+    <div class="control-group">
+      <label class="toggle-label">
+        <input type="checkbox" id="showSimilarToggle">
+        <span class="toggle-text">Show Similar Articles</span>
+      </label>
+      <div class="source-selector">
+        <span class="source-label">Source:</span>
+        <div class="source-buttons">
+          <button class="source-button active" data-source="annenberg">Annenberg</button>
+          <button class="source-button" data-source="latimes">LA Times</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
-<script>
-$(document).ready(function() {
-  checkLoginStatus();
-});
-</script>
+
+<div class="similar-articles-container" id="similarArticlesContainer" style="display: none;">
+  <div class="carousel-container">
+    <button class="carousel-button prev" id="prevButton">&lt;</button>
+    <div class="carousel" id="similarArticlesList"></div>
+    <button class="carousel-button next" id="nextButton">&gt;</button>
+  </div>
+</div>
 {% endblock %}

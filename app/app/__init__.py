@@ -1,58 +1,50 @@
 import os
+import logging
 from flask import Flask
-from dotenv import load_dotenv
 from authlib.integrations.flask_client import OAuth
-import spacy
+from .config import DevelopmentConfig, ProductionConfig
 
-load_dotenv()
-
-GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
-GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET")
-FLASK_SECRET_KEY = os.environ.get("FLASK_SECRET_KEY")
-OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
-TOGETHER_API_KEY = os.environ.get("TOGETHER_API_KEY")
-ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
-
-USE_SPACY = True
-CLEAN_TEXT = False
-LLM_CLIENT = "openai" 
-DEFAULT_CLAUDE_MODEL = "claude-3-5-haiku-latest"
-DEFAULT_TOGETHER_MODEL = "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo"
-DEFAULT_OPENAI_MODEL = "gpt-4o-mini"
-BATCH_SIZE = 2
-SKIP_LOGIN = True
-
-spacy_model = None
-def load_spacy_model():
-    global spacy_model
-    if spacy_model is None:
-        spacy_model = spacy.load("en_core_web_lg")
-    return spacy_model
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 def create_app():
+    logger.info("Starting application initialization...")
+    
     app = Flask(__name__, static_url_path='/', static_folder='static')
+    logger.info("Flask app created")
     
     # Load environment-specific config
     env = os.getenv('FLASK_ENV', 'development')
+    logger.info(f"Loading {env} configuration...")
+    
     if env == 'production':
-        app.config.from_object('app.config.production.ProductionConfig')
+        app.config.from_object(ProductionConfig)
     else:
-        app.config.from_object('app.config.development.DevelopmentConfig')
+        app.config.from_object(DevelopmentConfig)
+    logger.info("Configuration loaded")
 
-    # Override with environment variables
+    # Load environment variables
+    logger.info("Loading environment variables...")
     for key in app.config:
         env_val = os.getenv(key)
         if env_val is not None:
             app.config[key] = env_val
+    logger.info("Environment variables loaded")
 
-    app.secret_key = FLASK_SECRET_KEY
+    app.secret_key = app.config['FLASK_SECRET_KEY']
+    logger.info("Secret key configured")
 
     # Configure OAuth
+    logger.info("Configuring OAuth...")
     oauth = OAuth(app)
     google = oauth.register(
         name='google',
-        client_id=GOOGLE_CLIENT_ID,
-        client_secret=GOOGLE_CLIENT_SECRET,
+        client_id=app.config['GOOGLE_CLIENT_ID'],
+        client_secret=app.config['GOOGLE_CLIENT_SECRET'],
         access_token_url='https://oauth2.googleapis.com/token',
         access_token_params=None,
         authorize_url='https://accounts.google.com/o/oauth2/v2/auth',
@@ -67,13 +59,21 @@ def create_app():
     app.google = google
     app.analyzing_requests = set()
     app.oauth = oauth
+    logger.info("OAuth configured")
+
     # Load configuration from environment variable
     if 'APP_CONFIG_FILE' in os.environ:
+        logger.info("Loading additional configuration from APP_CONFIG_FILE...")
         app.config.from_envvar('APP_CONFIG_FILE')
+        logger.info("Additional configuration loaded")
 
+    logger.info("Registering blueprints...")
     from .auth import auth_bp
-    from .main_app import main_bp
+    from .app import main_bp
+    
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)
+    logger.info("Blueprints registered")
 
+    logger.info("Application initialization complete")
     return app
