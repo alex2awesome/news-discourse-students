@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import pickle
 import os
+import logging
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 os.environ["OMP_NUM_THREADS"] = "1"
 os.environ["MKL_NUM_THREADS"] = "1"
@@ -54,23 +55,32 @@ class SimpleRetriever:
         self.index.add(np.array(self.embeddings).astype("float32"))
 
     def search(self, query: str, top_k: int = 5):
-        query_vec = self.model.encode([query], normalize_embeddings=True)
-        scores, indices = self.index.search(np.array(query_vec).astype("float32"), top_k)
-        results = []
-        for i, score in zip(indices[0], scores[0]):
-            if i == -1:
-                continue
-            results.append({
-                "id": self.doc_ids[i],
-                "score": float(score),
-                "sentences": self.sentences[i] if self.sentences else None,
-                "labels": self.labels[i] if self.labels else None,
-                "headline": self.headlines[i] if self.headlines else None,
-                "subheader": self.subheaders[i] if self.subheaders else None,
-                "justification": self.justifications[i] if self.justifications else None,
-                "url": self.urls[i] if self.urls else None,
-            })
-        return results
+        logger = logging.getLogger(__name__)
+        logger.info(f"Searching for query: {query[:100]}...")
+        try:
+            query_vec = self.model.encode([query], normalize_embeddings=True)
+            logger.info("Query encoded successfully")
+            scores, indices = self.index.search(np.array(query_vec).astype("float32"), top_k)
+            logger.info("Search completed successfully")
+            results = []
+            for i, score in zip(indices[0], scores[0]):
+                if i == -1:
+                    continue
+                results.append({
+                    "id": self.doc_ids[i],
+                    "score": float(score),
+                    "sentences": self.sentences[i] if self.sentences else None,
+                    "labels": self.labels[i] if self.labels else None,
+                    "headline": self.headlines[i] if self.headlines else None,
+                    "subheader": self.subheaders[i] if self.subheaders else None,
+                    "justification": self.justifications[i] if self.justifications else None,
+                    "url": self.urls[i] if self.urls else None,
+                })
+            logger.info(f"Found {len(results)} results")
+            return results
+        except Exception as e:
+            logger.error(f"Error during search: {str(e)}")
+            raise
 
     def save(self, dir_path: str):
         os.makedirs(dir_path, exist_ok=True)
@@ -92,17 +102,29 @@ class SimpleRetriever:
             pickle.dump(metadata, f)
 
     def load(self, dir_path: str):
-        self.index = faiss.read_index(os.path.join(dir_path, "faiss.index"))
+        logger = logging.getLogger(__name__)
+        logger.info(f"Loading FAISS index from {dir_path}")
+        try:
+            index_path = os.path.join(dir_path, "faiss.index")
+            logger.info(f"Reading FAISS index from {index_path}")
+            self.index = faiss.read_index(index_path)
+            logger.info("FAISS index loaded successfully")
 
-        with open(os.path.join(dir_path, "metadata.pkl"), "rb") as f:
-            metadata = pickle.load(f)
-            self.doc_ids = metadata["doc_ids"]
-            self.sentences = metadata["sentences"]
-            self.labels = metadata["labels"]
-            self.headlines = metadata.get("headlines")
-            self.subheaders = metadata.get("subheaders")
-            self.justifications = metadata.get("justifications")
-            self.urls = metadata.get("urls")
+            metadata_path = os.path.join(dir_path, "metadata.pkl")
+            logger.info(f"Reading metadata from {metadata_path}")
+            with open(metadata_path, "rb") as f:
+                metadata = pickle.load(f)
+                self.doc_ids = metadata["doc_ids"]
+                self.sentences = metadata["sentences"]
+                self.labels = metadata["labels"]
+                self.headlines = metadata.get("headlines")
+                self.subheaders = metadata.get("subheaders")
+                self.justifications = metadata.get("justifications")
+                self.urls = metadata.get("urls")
+            logger.info("Metadata loaded successfully")
+        except Exception as e:
+            logger.error(f"Error loading index from {dir_path}: {str(e)}")
+            raise
 
 
 """

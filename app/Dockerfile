@@ -23,7 +23,7 @@ RUN pip install -r requirements.txt
 # Force reinstall numpy to ensure binary compatibility
 RUN pip install --force-reinstall numpy==1.25.0
 
-# Copy project
+# Copy project files
 COPY . .
 
 # Expose the port

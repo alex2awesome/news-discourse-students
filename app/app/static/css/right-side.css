@@ -1,0 +1,210 @@
+/* Additional styling for right-side layout */
+.similar-column {
+    padding-left: 20px;
+}
+
+.dive-deeper-section {
+    margin: 20px 0;
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.dive-deeper-section[style*="display: none"] {
+    opacity: 0;
+    visibility: hidden;
+}
+
+/* Source buttons styling */
+.source-button {
+    margin: 0 5px;
+    transition: all 0.3s ease;
+    background-color: transparent !important;
+}
+
+.source-button:hover {
+    background-color: rgba(13, 110, 253, 0.1) !important;
+    color: #0d6efd !important;
+}
+
+.source-button.active {
+    background-color: #0d6efd !important;
+    color: white !important;
+}
+
+/* Carousel styling */
+.carousel-container {
+    position: relative;
+    height: 100%;
+    overflow: hidden;
+}
+
+.carousel {
+    display: flex;
+    transition: transform 0.3s ease;
+    height: 100%;
+}
+
+.article-cards-container {
+    display: flex;
+    width: 100%;
+}
+
+.article-card {
+    flex: 0 0 100%;
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-right: 20px;
+    height: 100%;
+    overflow-y: auto;
+}
+
+/* Carousel controls */
+.carousel-controls {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 10;
+    display: flex;
+    gap: 10px;
+}
+
+.carousel-control {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border: 1px solid #dee2e6;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.carousel-control:hover {
+    background: #f8f9fa;
+    transform: scale(1.05);
+}
+
+.carousel-control:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Ensure smooth transition when switching columns */
+.analysis-column {
+    transition: all 0.3s ease;
+}
+
+/* Similar articles section */
+.similar-articles-section {
+    height: 100%;
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+/* Article card content */
+.article-headline {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #212529;
+}
+
+.article-subheader {
+    font-size: 1.25rem;
+    color: #495057;
+    margin-bottom: 1rem;
+    font-weight: 400;
+}
+
+.similarity-score {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-bottom: 1rem;
+}
+
+.sentences {
+    margin-top: 1rem;
+}
+
+.sentence {
+    margin-bottom: 1rem;
+    padding: 10px;
+    background: #fff;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.sentence .label {
+    flex-shrink: 0;
+    min-width: 120px;
+}
+
+.sentence .text {
+    flex-grow: 1;
+}
+
+/* Style the dive deeper toggle */
+.form-check.form-switch {
+    padding-left: 2.5em;
+}
+
+.form-check-input {
+    width: 2.5em;
+    margin-left: -2.5em;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba%280, 0, 0, 0.25%29'/%3e%3c/svg%3e");
+    background-position: left center;
+    border-radius: 2em;
+    transition: background-position .15s ease-in-out;
+}
+
+.form-check-input:checked {
+    background-position: right center;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
+}
+
+/* Structural Comparison Section */
+.structural-comparison-section {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 20px;
+    margin-top: 20px;
+    display: none; /* Hide by default */
+}
+
+.structural-comparison-section.show {
+    display: block; /* Show when .show class is added */
+}
+
+.structural-comparison-section h3 {
+    color: #333;
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.comparison-content {
+    line-height: 1.6;
+    color: #333;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    margin-top: 10px;
+}
+
+.comparison-content .label {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 3px;
+    margin: 0 2px;
+    font-size: 0.9em;
+} 

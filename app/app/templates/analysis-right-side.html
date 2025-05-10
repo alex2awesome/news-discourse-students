@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Article Analysis</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/right-side.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+</head>
+<body>
+    <div class="container-fluid">
+        <div id="loginContainer" class="text-center mt-5" style="display: none;">
+            <div id="loadingSpinner" class="spinner-border" role="status" style="display: none;">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p id="loginStatus"></p>
+            <a href="/login" class="btn btn-primary">Login with Google</a>
+        </div>
+
+        <div id="inputContainer" class="mt-4">
+            <div class="row">
+                <div class="col-12">
+                    <textarea id="promptInput" class="form-control" rows="10" placeholder="Paste your article here..."></textarea>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-12">
+                    <button id="sendButton" class="btn btn-primary">Send</button>
+                    <button id="stopButton" class="btn btn-danger" style="display: none;">Stop</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="outputContainer" class="mt-4" style="display: none;">
+            <div class="row">
+                <div class="col-12 analysis-column">
+                    <div class="analysis-heading">
+                        <h2>Analysis</h2>
+                    </div>
+                    <div class="analysis-explanation">
+                        <p>We've analyzed your article and labeled each sentence based on its role in the story. Hover over each label to learn more about why we tagged it that way.</p>
+                    </div>
+                    <div class="dive-deeper-section" style="display: none;">
+                        <div class="d-flex align-items-center mb-3">
+                            <h4 class="mb-0 me-3">Dive Deeper</h4>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-outline-primary source-button" data-source="annenberg">Show similar Annenberg articles</button>
+                                <button type="button" class="btn btn-outline-primary source-button" data-source="latimes">Show similar LATimes articles</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="analysisResults"></div>
+                </div>
+                <div class="col-6 similar-column" style="display: none;">
+                    <div class="similar-articles-section">
+                        <div class="carousel-container">
+                            <div class="carousel-controls">
+                                <button id="prevButton" class="btn btn-light carousel-control prev">
+                                    <i class="bi bi-chevron-left"></i>
+                                </button>
+                                <button id="nextButton" class="btn btn-light carousel-control next">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </div>
+                            <div class="carousel">
+                                <div id="similarArticlesList" class="article-cards-container"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="structural-comparison-section">
+                        <h3>Structural Comparison</h3>
+                        <div id="structuralComparison" class="comparison-content"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/right-side.js') }}"></script>
+</body>
+</html> 

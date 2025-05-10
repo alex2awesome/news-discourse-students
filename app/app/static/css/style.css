@@ -72,19 +72,19 @@ button {
 }
 
 .toggle-label {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
-  cursor: pointer;
   padding: 8px 12px;
-  background: #fff;
+  background: white;
+  border: 1px solid #dee2e6;
   border-radius: 6px;
-  border: 1px solid #ddd;
+  cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .toggle-label:hover {
-  background: #f0f0f0;
+  background: #f8f9fa;
 }
 
 .toggle-text {
@@ -141,6 +141,7 @@ button {
 
 /* Article card styles */
 .article-card {
+  position: relative;
   min-width: 100%;
   max-width: 100%;
   padding: 20px;
@@ -155,7 +156,7 @@ button {
 .article-card .article-headline {
   margin: 0 0 20px 0;
   color: #1a1a1a;
-  font-size: 2.3em !important;
+  font-size: 1.2em !important;
   line-height: 1.2;
   font-weight: 700;
   font-family: "Georgia", serif;
@@ -164,7 +165,7 @@ button {
 .article-card .article-subheader {
   margin: 0 0 20px 0;
   color: #4a4a4a;
-  font-size: 1.1em;
+  font-size: 1.0em;
   line-height: 1.4;
   font-weight: 400;
   font-style: italic;
@@ -203,7 +204,60 @@ button {
 .article-card .sentences {
   max-height: 400px;
   overflow-y: auto;
-  padding-right: 10px;
+  padding-right: 15px;
+  scrollbar-width: auto;
+  scrollbar-color: #666 #e0e0e0;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fafafa;
+  margin: 10px 0;
+}
+
+/* Webkit scrollbar styles */
+.article-card .sentences::-webkit-scrollbar {
+  width: 12px;
+}
+
+.article-card .sentences::-webkit-scrollbar-track {
+  background: #e0e0e0;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.article-card .sentences::-webkit-scrollbar-thumb {
+  background: #666;
+  border-radius: 6px;
+  border: 2px solid #e0e0e0;
+}
+
+.article-card .sentences::-webkit-scrollbar-thumb:hover {
+  background: #444;
+}
+
+/* Add gradient fade at bottom to indicate more content */
+.article-card .sentences::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: linear-gradient(transparent, rgba(255, 255, 255, 0.95));
+  pointer-events: none;
+}
+
+/* Add a scroll indicator text */
+.article-card .sentences::before {
+  content: 'Scroll for more content';
+  position: absolute;
+  bottom: 5px;
+  right: 15px;
+  font-size: 12px;
+  color: #666;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 2px 8px;
+  border-radius: 4px;
+  pointer-events: none;
 }
 
 .article-card .sentence {
@@ -234,6 +288,12 @@ button {
   margin-top: 40px;
   padding-top: 20px;
   border-top: 1px solid #ccc;
+  transition: all 0.3s ease-in-out;
+}
+
+.similar-articles-section.show {
+  opacity: 1;
+  visibility: visible;
 }
 
 .similar-articles-section h2 {
@@ -316,4 +376,30 @@ button {
 .comparison-error {
   color: #dc3545;
   padding: 10px 0;
+}
+
+/* Add styles for layout transitions */
+#analysisColumn {
+  transition: all 0.3s ease-in-out;
+}
+
+/* Update dive-deeper control styles */
+.dive-deeper-control {
+  margin-top: 20px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+  transition: all 0.3s ease-in-out;
+}
+
+.dive-deeper-control h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.dive-deeper-control p {
+  margin-bottom: 15px;
+  color: #666;
 }

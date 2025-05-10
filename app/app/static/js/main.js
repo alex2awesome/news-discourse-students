@@ -280,33 +280,29 @@ $(document).ready(function() {
     const container = $('#similarArticlesList');
     container.empty();
     
-    // Create all article cards immediately with loading states
     articles.forEach(article => {
       const articleDiv = $('<div>').addClass('article-card');
       
-      // Add headline
       const headlineDiv = $('<h3>').addClass('article-headline').text(article.headline);
       articleDiv.append(headlineDiv);
       
-      // Add subheader
       if (article.subheader) {
         const subheaderDiv = $('<h4>').addClass('article-subheader').text(article.subheader);
         articleDiv.append(subheaderDiv);
       }
       
-      // Add URL
       if (article.url) {
         const urlDiv = $('<div>').addClass('article-url');
         const urlLink = $('<a>')
           .attr('href', article.url)
           .attr('target', '_blank')
-          .text('Read full article online')
+          // .text('Read full article online')
+          .text(article.url)
           .addClass('article-link');
         urlDiv.append(urlLink);
         articleDiv.append(urlDiv);
       }
       
-      // Add similarity score
       const scoreDiv = $('<div>').addClass('similarity-score')
         .text(`Similarity Score: ${article.score.toFixed(3)}`);
       articleDiv.append(scoreDiv);
@@ -327,7 +323,6 @@ $(document).ready(function() {
             }
           }
           
-          // Add tooltip with justification if available
           if (tooltipTexts[label]) {
             const tooltipText = '<strong>' + label + '</strong><br><br>' +
               '<u>Why we tagged this:</u> ' + justification;
@@ -339,10 +334,8 @@ $(document).ready(function() {
               'data-bs-html': 'true'
             });
             
-            // Initialize tooltip
             new bootstrap.Tooltip(labelSpan[0], { html: true });
             
-            // Add hover effects
             labelSpan.on('mouseenter', function() {
               $(this).css('border', '2px solid red');
             }).on('mouseleave', function() {
@@ -447,13 +440,10 @@ $(document).ready(function() {
       return;
     }
     
-    // Show output container and add heading/explanation
+    // Show output container and elements
     $('#outputContainer').show();
-    $('#outputContainer').prepend(`
-      <h2>We've analyzed the structure of your story for you</h2>
-      <p class="analysis-explanation"><u>Mouse over each label to see more information about how each label was annotated.</u> Please take these results with a grain of salt. Confusing labels might be the result of mislabeling on our part. If you didn't to have the structure you see, it could be an indication that you didn't write sentences clearly in one style.</p>
-    `);
-    $('.similar-articles-section').show();
+    $('.analysis-heading').show();
+    $('.analysis-explanation').show();
     $('#sendButton').hide();
     $('#stopButton').show();
     
@@ -568,45 +558,32 @@ $(document).ready(function() {
         break;
         
       case 'analysis':
-        // Log the raw response
-        console.log('Raw analysis response:', data.analysis);
-        
-        // Parse the JSON response
         let analysisData;
         try {
           analysisData = JSON.parse(data.analysis);
-          console.log('Parsed analysis data:', analysisData);
         } catch (e) {
           console.error('Error parsing analysis JSON:', e);
-          console.error('Failed to parse string:', data.analysis);
           analysisData = { label: data.analysis, justification: '' };
         }
         
-        // Update the label for the analyzed sentence
         const sentenceDiv = $('#analysisResults .sentence').eq(data.index);
         const labelSpan = sentenceDiv.find('.label');
         const analysisLabel = toTitleCase(analysisData.label);
-        console.log('Formatted label:', analysisLabel);
         
-        // Store the analyzed label
         analyzedLabels[data.index] = analysisLabel;
-        
-        // Update the label text
         labelSpan.text(analysisLabel);
         
-        // Apply color if available
         if (colorMap[analysisLabel]) {
           labelSpan.css('background-color', colorMap[analysisLabel]);
           if (!['Background Information', 'Color', 'Other'].includes(analysisLabel)) {
             labelSpan.css('color', 'white');
           }
-        } else {
-          console.warn('No color mapping found for label:', analysisLabel);
         }
         
-        // Add tooltip if available
         if (tooltipTexts[analysisLabel]) {
           const tooltipText = '<strong>' + analysisLabel + '</strong><br><br>' +
+            '<u>Definition:</u> ' + tooltipTexts[analysisLabel].definition + '<br><br>' +
+            '<u>Instructions:</u> ' + tooltipTexts[analysisLabel].instructions + '<br><br>' +
             '<u>Why we tagged this:</u> ' + analysisData.justification;
           
           labelSpan.attr({
@@ -616,34 +593,29 @@ $(document).ready(function() {
             'data-bs-html': 'true'
           });
           
-          // Initialize tooltip
           new bootstrap.Tooltip(labelSpan[0], { html: true });
           
-          // Add hover effects
           labelSpan.on('mouseenter', function() {
             $(this).css('border', '2px solid red');
           }).on('mouseleave', function() {
             $(this).css('border', '');
           });
-        } else {
-          console.warn('No tooltip found for label:', analysisLabel);
         }
         break;
         
       case 'complete':
         $('#sendButton').show();
         $('#stopButton').hide();
+        $('.similar-articles-section').show().css({
+          'opacity': '1',
+          'visibility': 'visible'
+        });
         
-        // Now that analysis is complete, generate comparisons for stored articles
         if (window.similarArticles) {
-          // Verify all labels are analyzed
           const unanalyzedLabels = analyzedLabels.filter(label => label === 'Analyzing...');
           if (unanalyzedLabels.length > 0) {
-            console.error('Not all labels have been analyzed yet:', unanalyzedLabels.length, 'remaining');
-            // Force update any remaining "Analyzing..." labels to "Other"
             analyzedLabels = analyzedLabels.map(label => label === 'Analyzing...' ? 'Other' : label);
             
-            // Update any remaining "Analyzing..." labels in the UI
             $('#analysisResults .sentence').each(function(index) {
               const labelSpan = $(this).find('.label');
               if (labelSpan.text() === 'Analyzing...') {
@@ -753,7 +725,7 @@ async function checkLoginStatus() {
     loginButton.hide();
     loginStatus.text("Checking login status...");
 
-    const response = await fetch("/api/ask", {
+    const response = await fetch("/api/check_login", {
       method: 'GET',
       headers: {'Content-Type': 'application/json'}
     });

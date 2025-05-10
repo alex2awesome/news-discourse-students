@@ -23,6 +23,9 @@ def get_retriever(source='annenberg'):
         logger.info(f"Initializing FAISS retriever for {source}...")
         _retrievers[source] = SimpleRetriever()
         index_path = os.path.join(os.path.dirname(__file__), f"{source}_index")
+        logger.info(f"Looking for index at: {index_path}")
+        logger.info(f"Current working directory: {os.getcwd()}")
+        logger.info(f"Directory contents: {os.listdir(os.path.dirname(__file__))}")
         if os.path.exists(index_path):
             logger.info(f"Loading FAISS index from {index_path}")
             _retrievers[source].load(index_path)
@@ -43,6 +46,9 @@ def index():
 def analysis_page():
     if not session.get('logged_in'):
         return redirect('/')
+    layout = request.args.get('layout', 'default')
+    if layout == 'right-split':
+        return render_template('analysis-right-side.html')
     return render_template('analysis.html')
 
 @main_bp.route('/api/ask', methods=['GET', 'POST'])
@@ -217,4 +223,10 @@ def compare_articles():
     except Exception as e:
         logger.error(f"Error in compare_articles: {str(e)}")
         return jsonify({"message": str(e)}), 500
+
+@main_bp.route('/api/check_login', methods=['GET'])
+def check_login():
+    if not session.get('logged_in'):
+        return jsonify({"message": "Unauthorized"}), 401
+    return jsonify({"message": "Authorized"}), 200
 

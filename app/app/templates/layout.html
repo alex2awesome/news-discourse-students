@@ -7,6 +7,9 @@
 <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css') }}">
+{% if request.args.get('layout') == 'right-split' %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/right-split.css') }}">
+{% endif %}
 </head>
 <body>
   <div class="container mt-4">
@@ -15,5 +18,8 @@
   <script defer src="{{ url_for('static', filename='vendor/jquery/jquery-3.6.0.min.js') }}"></script>
   <script defer src="{{ url_for('static', filename='vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
   <script defer src="{{ url_for('static', filename='js/main.js') }}"></script>
+  {% if request.args.get('layout') == 'right-split' %}
+  <script defer src="{{ url_for('static', filename='js/right-split.js') }}"></script>
+  {% endif %}
 </body>
 </html>
