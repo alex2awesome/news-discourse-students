@@ -46,9 +46,7 @@ def index():
 def analysis_page():
     if not session.get('logged_in'):
         return redirect('/')
-    layout = request.args.get('layout', 'default')
-    if layout == 'right-split':
-        return render_template('analysis-right-side.html')
+    # Always render the unified analysis page (right-split layout is now the default)
     return render_template('analysis.html')
 
 @main_bp.route('/api/ask', methods=['GET', 'POST'])

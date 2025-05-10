@@ -141,16 +141,129 @@ button {
 
 /* Article card styles */
 .article-card {
-  position: relative;
-  min-width: 100%;
-  max-width: 100%;
-  padding: 20px;
+  display: flex;
+  flex-direction: column;
   background: white;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  padding: 0;
   margin: 0;
-  flex: 0 0 100%;
-  box-sizing: border-box;
+  height: 100%;
+}
+
+/* Fixed height header area that contains all non-sentences content */
+.article-card-header {
+  padding: 15px;
+  flex: 0 0 auto;
+  height: 100px; /* Fixed to keep headers equal height */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  overflow: hidden; /* prevent large headlines from expanding header */
+}
+
+.article-card-header h3 {
+  margin: 0 0 5px 0;
+  line-height: 1.2;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+/* allow header content to scroll inside maybe? But keep overflow hidden so truncated ellipsis. Use text-overflow. */
+.article-card-header h3, .article-card-header .article-link {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Style for URL and similarity score */
+.article-url, .similarity-score {
+  margin: 5px 0;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+/* Style for article link */
+.article-link {
+  color: #007bff;
+  text-decoration: none;
+  font-size: 0.9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+}
+
+/* Ensure sentences containers have consistent height and styling */
+.article-card .sentences {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 15px;
+  background: #f8f9fa;
+  border-top: 1px solid #ddd;
+  margin: 0;
+  min-height: 0; /* allow flex item to shrink */
+}
+
+/* Ensure sentence itself is styled consistently */
+.sentence {
+  display: flex;
+  align-items: flex-start;
+  padding: 10px;
+  margin-bottom: 10px;
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.sentence .label {
+  flex: 0 0 auto;
+  margin-right: 10px;
+  min-width: 100px;
+  text-align: center;
+  transition: outline 0.2s ease;
+}
+
+.sentence .text {
+  flex: 1;
+}
+
+.sentence .label:hover,
+#structuralComparison .label:hover {
+  outline: 2px solid #ff0000;
+  cursor: pointer;
+}
+
+/* Make columns perfect match */
+.analysis-column, .similar-column {
+  display: flex;
+  padding: 15px;
+}
+
+/* Ensure carousel container has consistent spacing */
+.carousel-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  position: relative;
+}
+
+/* Position carousel controls */
+.carousel-controls {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  z-index: 10;
+  display: flex;
+  gap: 10px;
+}
+
+/* Style carousel itself */
+.carousel {
+  flex: 1;
+  display: flex;
+  height: 100%;
 }
 
 .article-card .article-headline {
@@ -169,36 +282,6 @@ button {
   line-height: 1.4;
   font-weight: 400;
   font-style: italic;
-}
-
-.article-url {
-  margin: 0 0 15px 0;
-}
-
-.article-link {
-  color: #007bff;
-  text-decoration: none;
-  font-size: 0.9em;
-  display: inline-block;
-  padding: 4px 0;
-}
-
-.article-link:hover {
-  color: #0056b3;
-  text-decoration: underline;
-}
-
-.similarity-score {
-  margin: 0 0 15px 0;
-  color: #666;
-  font-size: 0.9em;
-  font-weight: 500;
-}
-
-.article-card h3 {
-  margin-top: 0;
-  color: #333;
-  font-size: 1.1em;
 }
 
 .article-card .sentences {
@@ -258,14 +341,6 @@ button {
   padding: 2px 8px;
   border-radius: 4px;
   pointer-events: none;
-}
-
-.article-card .sentence {
-  margin: 10px 0;
-  padding: 10px;
-  background: #f5f5f5;
-  border-radius: 4px;
-  word-wrap: break-word;
 }
 
 .article-card .label {
@@ -402,4 +477,555 @@ button {
 .dive-deeper-control p {
   margin-bottom: 15px;
   color: #666;
+}
+
+/* ------- Merged right-side layout styles ------- */
+.similar-column {
+    padding-left: 20px;
+}
+
+.analysis-column {
+    transition: all 0.3s ease;
+}
+
+.dive-deeper-section {
+    margin: 20px 0;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+/* Hide dive-deeper section smoothly when needed */
+.dive-deeper-section[style*="display: none"] {
+    opacity: 0;
+    visibility: hidden;
+}
+
+/* In-article carousel (right column) */
+.carousel-container {
+    position: relative;
+    height: 100%;
+    overflow: hidden;
+}
+
+.carousel {
+    display: flex;
+    transition: transform 0.3s ease;
+    height: 100%;
+}
+
+.article-cards-container {
+    display: flex;
+    width: 100%;
+}
+
+/* Ensure carousel items are full width and not stacked */
+.article-card {
+    flex: 0 0 100%;
+    width: 100%;
+    max-width: 100%;
+}
+
+.carousel-control {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border: 1px solid #dee2e6;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+
+.carousel-control:hover {
+    background: #f8f9fa;
+    transform: scale(1.05);
+}
+
+.carousel-control:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Structural comparison section - hidden by default */
+.structural-comparison-section {
+    display: none;
+    margin-top: 20px; /* Reduce the margin to remove excessive whitespace */
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: margin-top 0.1s ease; /* Smooth transition when resizing */
+    position: relative; /* Ensure proper stacking */
+    z-index: 90; /* Below the slider but above other content */
+}
+
+/* Add a container for article cards with consistent padding */
+.article-card-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Article comparison row - contains both analysis and similar articles */
+.article-comparison-row {
+  display: flex;
+  align-items: stretch;
+}
+
+/* Consistent article card styling */
+.article-card {
+  flex: 1;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  background: white;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Ensure article headings are consistent */
+.article-card h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #333;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+/* Ensure sentences container has consistent height and scrolling */
+.article-card .sentences {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  min-height: 300px;
+  max-height: 500px;
+}
+
+/* Fix column padding */
+.analysis-column, .similar-column {
+  padding: 0 15px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Ensure carousel fills the similar column height */
+.carousel-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.carousel {
+  flex: 1;
+  display: flex;
+  transition: transform 0.3s ease;
+}
+
+/* Ensure article cards container fills carousel */
+.article-cards-container {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+/* Make sure carousel articles match main analysis height */
+#similarArticlesList .article-card {
+  flex: 0 0 100%;
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+}
+
+/* Wrapper to ensure perfect alignment */
+.article-card-wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Ensure #analysisResults and carousel container match perfectly */
+#analysisResults, .carousel-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* Grid layout for perfect alignment */
+.article-cards-grid {
+  display: flex; /* Change from grid to flex for resizing */
+  position: relative;
+  gap: 0; /* Remove gap to accommodate slider */
+  margin: 0;
+  padding: 0;
+  height: 70vh; /* Set initial height based on verticalSliderPosition */
+  transition: height 0.1s ease; /* Smooth transition when resizing */
+  min-height: 300px; /* Ensure minimum height for content */
+  max-height: 80vh; /* Prevent excessive height */
+}
+
+/* Column sizing */
+.analysis-side, .similar-side {
+  flex: 1; /* Start with equal sizing */
+  position: relative;
+  padding: 0 10px;
+  transition: flex 0.1s ease; /* Smooth transitions when resizing */
+  min-width: 200px; /* Prevent columns from becoming too narrow */
+}
+
+/* Column resize slider */
+.column-resize-slider {
+  width: 10px;
+  background-color: #e9ecef;
+  cursor: col-resize;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  transition: background-color 0.2s ease;
+}
+
+.column-resize-slider:hover,
+.column-resize-slider.dragging {
+  background-color: #007bff;
+}
+
+.column-resize-slider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 4px;
+  height: 50px;
+  background-color: #dee2e6;
+  border-radius: 2px;
+}
+
+.column-resize-slider:hover::after,
+.column-resize-slider.dragging::after {
+  background-color: #fff;
+}
+
+/* Vertical resize slider - make it more visible and improve positioning */
+.vertical-resize-slider {
+  height: 6px;
+  background-color: #dee2e6;
+  cursor: row-resize;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -3px; /* Position precisely at the bottom edge */
+  z-index: 100;
+  transition: background-color 0.2s ease;
+  border-radius: 3px;
+}
+
+.vertical-resize-slider:hover,
+.vertical-resize-slider.dragging {
+  background-color: #007bff;
+}
+
+.vertical-resize-slider::after {
+  content: '⋯'; /* Horizontal ellipsis character */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #6c757d;
+  font-size: 16px;
+  line-height: 0;
+}
+
+.vertical-resize-slider:hover::after,
+.vertical-resize-slider.dragging::after {
+  color: white;
+}
+
+/* Add smooth transition for similar side */
+.similar-side {
+  position: relative;
+  transition: opacity 0.3s ease, transform 0.3s ease, flex 0.1s ease;
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Animate similar side appearance */
+.similar-side[style*="display: none"] {
+  opacity: 0;
+  transform: translateX(20px);
+}
+
+/* Make analysis side take full width when similar-side is hidden */
+.similar-side[style*="display: none"] + .analysis-side {
+  flex: 1;
+}
+
+.article-cards-grid:has(.similar-side[style*="display: none"]) .analysis-side {
+  flex: 1;
+}
+
+/* Source buttons with better styling */
+.btn-outline-primary.source-button {
+  background-color: #f0f7ff; /* Light blue background */
+  border-color: #007bff;
+  color: #007bff;
+  transition: all 0.2s ease;
+}
+
+.btn-outline-primary.source-button:hover {
+  background-color: #e0efff; /* Slightly darker on hover */
+  color: #0056b3;
+}
+
+.btn-outline-primary.source-button.active {
+  background-color: #007bff;
+  color: white;
+}
+
+/* Consistent headline styling */
+.article-card-header h3 {
+  margin: 0 0 8px 0;
+  padding: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: #212529;
+  white-space: normal;
+  overflow: visible;
+  font-family: inherit;
+}
+
+/* Make sentences flow better with inline labels */
+.sentence {
+  display: block;
+  padding: 10px;
+  margin-bottom: 10px;
+  background: white;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.sentence .label {
+  float: left;
+  margin-right: 10px;
+  margin-bottom: 5px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 0.9em;
+  min-width: 80px;
+  text-align: center;
+  vertical-align: top;
+}
+
+.sentence .text {
+  display: inline;
+  margin: 0;
+  vertical-align: top;
+}
+
+/* Responsive behavior */
+@media (max-width: 768px) {
+  .article-cards-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Placeholders for article cards */
+.card-placeholder {
+  height: 100%;
+  position: relative;
+  overflow: hidden; /* contain carousel */
+}
+
+/* Carousel layout for individual cards */
+#similarArticlesList {
+  width: 100%;
+  height: 100%;
+}
+
+/* Ensure carousel items display properly */
+#similarArticlesList .article-card {
+  width: 100%;
+  height: 100%;
+}
+
+/* Style for URL */
+.article-url {
+  margin: 5px 0;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+/* Position carousel controls */
+.carousel-controls {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 100;
+  display: flex;
+  gap: 10px;
+}
+
+/* Article card styles - exact same structure for both sides */
+.article-card {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  height: 100%;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+/* Header section */
+.article-card-header {
+  padding: 15px;
+  background: white;
+  border-bottom: 1px solid #ddd;
+}
+
+/* Article link styling */
+.article-link {
+  color: #007bff;
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  max-width: 100%;
+}
+
+/* Sentences section */
+.article-card .sentences {
+  padding: 15px;
+  background: #f8f9fa;
+  overflow-y: auto;
+}
+
+/* Styling for highlighted sentences when scrolled to */
+.highlighted-sentence {
+  animation: highlight-pulse 1.5s ease;
+}
+
+@keyframes highlight-pulse {
+  0% { background-color: white; }
+  25% { background-color: rgba(255, 220, 220, 0.8); }
+  50% { background-color: rgba(255, 200, 200, 0.6); }
+  100% { background-color: white; }
+}
+
+/* Styling for comparison paragraphs */
+.comparison-paragraph {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+}
+
+.student-paragraph {
+  border-left: 4px solid #007bff;
+}
+
+.professional-paragraph {
+  border-left: 4px solid #28a745;
+}
+
+/* Style for labels within comparison text */
+#structuralComparison .label {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 3px;
+  margin: 0 3px;
+  font-size: 0.9em;
+  cursor: pointer;
+  transition: outline 0.2s ease;
+}
+
+/* Styling for structure terms */
+.structure-term {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 3px;
+  margin: 0 3px;
+  font-size: 0.9em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: outline 0.2s ease;
+}
+
+.structure-term:hover {
+  outline: 2px solid #ff0000;
+}
+
+/* Tooltip for cycling through multiple matches */
+.click-again-tooltip {
+  position: absolute;
+  z-index: 1000;
+  background-color: #333;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  pointer-events: none;
+  white-space: nowrap;
+  animation: fadeIn 0.2s ease;
+}
+
+.click-again-tooltip:after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  margin-left: -5px;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 5px solid #333;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Make sure the content containers fill available height */
+.card-placeholder {
+  height: 100%;
+  position: relative;
+  overflow: hidden; /* contain carousel */
+}
+
+/* Ensure article card takes full height of container */
+.article-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden; /* prevent overflow */
+}
+
+/* Make sure the sentences containers fill available height */
+.article-card .sentences {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0; /* allow flex container to shrink if needed */
+}
+
+/* Remove any margin at the bottom of the article grid to reduce whitespace */
+.article-cards-grid {
+  margin-bottom: 0;
 }
